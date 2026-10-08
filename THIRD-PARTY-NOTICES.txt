@@ -1,0 +1,19 @@
+Mac-ModInstaller third-party notices
+
+ZIPFoundation 0.9.20
+https://github.com/weichsel/ZIPFoundation
+Copyright (c) 2017-2025 Thomas Zoechling (https://www.peakstep.com)
+License: MIT. Full license: LICENSES/ZIPFoundation-MIT.txt.
+Resolved through Swift Package Manager; the dependency source is not vendored.
+The build script includes its license in the local application bundle.
+
+Apple SDKs and SF Symbols
+The application uses SwiftUI, AppKit, Foundation and Apple system symbols.
+These Apple-provided materials are governed by their applicable Apple terms.
+The app icon is generated with AppKit and the shippingbox.fill system symbol.
+
+Warhammer 40,000: Rogue Trader and Unity Mod Manager
+Mac-ModInstaller interoperates with their existing mod folders and settings.
+No game files, mod packages, Owlcat SDK assemblies or UMM binaries are included.
+This is an independent project, not an official Owlcat, Games Workshop, Unity
+or Apple product.

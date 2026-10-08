@@ -1,0 +1,34 @@
+Mac-ModInstaller — Permission Required / All Rights Reserved
+
+Copyright (c) 2026 Poffl. All rights reserved.
+
+This repository is publicly visible, but the original Mac-ModInstaller code and
+project materials are not offered under an open-source license.
+
+Except for rights required by applicable law, rights granted under GitHub's
+Terms of Service for hosting and viewing public repositories and making forks
+through GitHub's functionality, or permission expressly granted in writing by
+Poffl, no permission is granted to use, run, copy, modify, adapt, distribute,
+sublicense, sell, or incorporate this software or its original project materials
+into another project. This applies to both commercial and non-commercial use.
+
+Obtain Poffl's express written permission BEFORE undertaking any such activity.
+A request alone, attribution, a public fork, or the absence of a response does
+not constitute permission. Permission is limited to the scope expressly agreed
+in writing; all other rights remain reserved.
+
+Permission requests: open an issue titled "Permission request" at
+https://github.com/Poffl-Mods/Mac-Modinstaller/issues and describe your intended
+use, or use a contact method published by https://github.com/Poffl.
+
+Third-party components are excluded from this notice and remain subject to
+their respective licenses. In particular, ZIPFoundation is MIT-licensed; see
+THIRD-PARTY-NOTICES.txt and LICENSES/ZIPFoundation-MIT.txt. Apple frameworks,
+system symbols and other Apple-provided materials remain subject to Apple's
+applicable terms. This notice does not claim ownership of third-party work.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. TO THE EXTENT PERMITTED BY LAW, THE COPYRIGHT HOLDER SHALL
+NOT BE LIABLE FOR CLAIMS, DAMAGES OR OTHER LIABILITY ARISING FROM THE SOFTWARE
+OR ITS USE.
