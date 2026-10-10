@@ -84,7 +84,13 @@
     "Die Konfiguration wurde zwischenzeitlich geändert. Bitte erneut versuchen.": "Die Konfiguration wurde zwischenzeitlich geändert. Bitte erneut versuchen.",
     "Wiederherstellung erforderlich. Die Sicherung liegt unter {0}. Ursache: {1}": "Wiederherstellung erforderlich. Die Sicherung liegt unter {0}. Ursache: {1}",
     "Der Vorgang konnte nicht abgeschlossen werden. Details: {0}": "Der Vorgang konnte nicht abgeschlossen werden. Details: {0}",
-    "Noch keine Sicherungen vorhanden.": "Noch keine Sicherungen vorhanden."
+    "Noch keine Sicherungen vorhanden.": "Noch keine Sicherungen vorhanden.",
+    "Cogitator des Maschinenkults": "Cogitator des Maschinenkults",
+    "Verbindung zum Datenaltar": "Verbindung zum Datenaltar",
+    "Ritus der Integration": "Ritus der Integration",
+    "Maschinengeist-Protokoll": "Maschinengeist-Protokoll",
+    "Gelobt sei der Omnissiah.": "Gelobt sei der Omnissiah.",
+    "Das Datenarchiv erwartet deine Mods.": "Das Datenarchiv erwartet deine Mods."
   },
   "en": {
     "Sprache": "Language",
@@ -171,7 +177,13 @@
     "Die Konfiguration wurde zwischenzeitlich geändert. Bitte erneut versuchen.": "The configuration changed in the meantime. Please try again.",
     "Wiederherstellung erforderlich. Die Sicherung liegt unter {0}. Ursache: {1}": "Recovery required. Backup: {0}. Cause: {1}",
     "Der Vorgang konnte nicht abgeschlossen werden. Details: {0}": "The operation could not be completed. Details: {0}",
-    "Noch keine Sicherungen vorhanden.": "No backups yet."
+    "Noch keine Sicherungen vorhanden.": "No backups yet.",
+    "Cogitator des Maschinenkults": "Cogitator of the Machine Cult",
+    "Verbindung zum Datenaltar": "Data altar connection",
+    "Ritus der Integration": "Rite of integration",
+    "Maschinengeist-Protokoll": "Machine spirit log",
+    "Gelobt sei der Omnissiah.": "Praise the Omnissiah.",
+    "Das Datenarchiv erwartet deine Mods.": "The data archive awaits your mods."
   },
   "fr": {
     "Sprache": "Langue",
@@ -258,7 +270,13 @@
     "Die Konfiguration wurde zwischenzeitlich geändert. Bitte erneut versuchen.": "La configuration a été modifiée entre-temps. Réessayez.",
     "Wiederherstellung erforderlich. Die Sicherung liegt unter {0}. Ursache: {1}": "Restauration nécessaire. Sauvegarde : {0}. Cause : {1}",
     "Der Vorgang konnte nicht abgeschlossen werden. Details: {0}": "L’opération n’a pas pu être terminée. Détails : {0}",
-    "Noch keine Sicherungen vorhanden.": "Aucune sauvegarde pour le moment."
+    "Noch keine Sicherungen vorhanden.": "Aucune sauvegarde pour le moment.",
+    "Cogitator des Maschinenkults": "Cogitateur du Culte de la Machine",
+    "Verbindung zum Datenaltar": "Connexion à l’autel de données",
+    "Ritus der Integration": "Rite d’intégration",
+    "Maschinengeist-Protokoll": "Journal de l’esprit de la machine",
+    "Gelobt sei der Omnissiah.": "Loué soit l’Omnimessie.",
+    "Das Datenarchiv erwartet deine Mods.": "Les archives attendent vos mods."
   },
   "es": {
     "Sprache": "Idioma",
@@ -345,7 +363,13 @@
     "Die Konfiguration wurde zwischenzeitlich geändert. Bitte erneut versuchen.": "La configuración ha cambiado durante la operación. Inténtalo de nuevo.",
     "Wiederherstellung erforderlich. Die Sicherung liegt unter {0}. Ursache: {1}": "Se requiere restauración. Copia de seguridad: {0}. Causa: {1}",
     "Der Vorgang konnte nicht abgeschlossen werden. Details: {0}": "No se pudo completar la operación. Detalles: {0}",
-    "Noch keine Sicherungen vorhanden.": "Todavía no hay copias de seguridad."
+    "Noch keine Sicherungen vorhanden.": "Todavía no hay copias de seguridad.",
+    "Cogitator des Maschinenkults": "Cogitador del Culto a la Máquina",
+    "Verbindung zum Datenaltar": "Conexión al altar de datos",
+    "Ritus der Integration": "Rito de integración",
+    "Maschinengeist-Protokoll": "Registro del espíritu máquina",
+    "Gelobt sei der Omnissiah.": "Alabado sea el Omnissiah.",
+    "Das Datenarchiv erwartet deine Mods.": "El archivo de datos espera tus mods."
   },
   "ru": {
     "Sprache": "Язык",
@@ -432,7 +456,13 @@
     "Die Konfiguration wurde zwischenzeitlich geändert. Bitte erneut versuchen.": "Конфигурация была изменена во время операции. Повторите попытку.",
     "Wiederherstellung erforderlich. Die Sicherung liegt unter {0}. Ursache: {1}": "Требуется восстановление. Резервная копия: {0}. Причина: {1}",
     "Der Vorgang konnte nicht abgeschlossen werden. Details: {0}": "Не удалось завершить операцию. Подробности: {0}",
-    "Noch keine Sicherungen vorhanden.": "Резервных копий пока нет."
+    "Noch keine Sicherungen vorhanden.": "Резервных копий пока нет.",
+    "Cogitator des Maschinenkults": "Когитатор Культа Машины",
+    "Verbindung zum Datenaltar": "Связь с алтарём данных",
+    "Ritus der Integration": "Ритуал интеграции",
+    "Maschinengeist-Protokoll": "Журнал машинного духа",
+    "Gelobt sei der Omnissiah.": "Хвала Омниссии.",
+    "Das Datenarchiv erwartet deine Mods.": "Архив данных ожидает ваши моды."
   },
   "zh-Hans": {
     "Sprache": "语言",
@@ -519,6 +549,12 @@
     "Die Konfiguration wurde zwischenzeitlich geändert. Bitte erneut versuchen.": "操作期间配置已被更改，请重试。",
     "Wiederherstellung erforderlich. Die Sicherung liegt unter {0}. Ursache: {1}": "需要恢复。备份位置：{0}。原因：{1}",
     "Der Vorgang konnte nicht abgeschlossen werden. Details: {0}": "无法完成操作。详细信息：{0}",
-    "Noch keine Sicherungen vorhanden.": "尚无备份。"
+    "Noch keine Sicherungen vorhanden.": "尚无备份。",
+    "Cogitator des Maschinenkults": "机械教认知机",
+    "Verbindung zum Datenaltar": "数据祭坛连接",
+    "Ritus der Integration": "整合仪式",
+    "Maschinengeist-Protokoll": "机魂日志",
+    "Gelobt sei der Omnissiah.": "赞美欧姆弥赛亚。",
+    "Das Datenarchiv erwartet deine Mods.": "数据档案静候你的模组。"
   }
 }

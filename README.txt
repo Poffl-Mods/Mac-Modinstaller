@@ -126,3 +126,16 @@ Die Auswahl wird gespeichert und sofort auf die app-eigenen Texte angewendet.
 Native macOS-Menüs und Teile des Dateidialogs folgen der Systemsprache.
 Die Bundle-ID und bisherigen Sicherungspfade bleiben für bestehende Einstellungen stabil.
 85 Meldungen in sechs Sprachen, 14 Tests erfolgreich.
+
+Cogitator interface (10.10.2026)
+------------------------------
+Adeptus Mechanicus-inspired native SwiftUI appearance: dark metal, brass frames,
+Mechanicus red, phosphor green, static scanlines and an original cog/skull glyph.
+Main window, package preview and app icon share the theme. All six UI languages
+include the new ritual headings; operational labels remain explicit.
+Reference research: the Machine Cult / Omnissiah overview on Warhammer Community
+https://www.warhammer-community.com/de-de/topics/adeptus-mechanicus/
+and Rogue Trader's cogitator/data altar imagery. No external artwork is bundled.
+Validation: 14 tests passed; main window and ToyBox update preview inspected.
+No installation into the game was performed during this design verification.
+The build script accepts optional Swift build arguments for restricted environments.

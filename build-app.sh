@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")"
-swift build -c release
+swift build -c release "$@"
 APP="$PWD/dist/Mac-ModInstaller.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp .build/release/RogueModInstaller "$APP/Contents/MacOS/RogueModInstaller"
@@ -25,7 +25,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <key>CFBundleLocalizations</key><array><string>en</string><string>de</string><string>fr</string><string>es</string><string>ru</string><string>zh-Hans</string></array>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>
-<key>CFBundleIconFile</key><string>AppIcon</string>
+<key>CFBundleIconFile</key><string>CogitatorIcon</string>
 <key>CFBundleDocumentTypes</key><array><dict>
 <key>CFBundleTypeName</key><string>Mod ZIP</string>
 <key>CFBundleTypeRole</key><string>Viewer</string>
@@ -34,7 +34,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </dict></array>
 </dict></plist>
 PLIST
-if [ -f AppIcon.icns ]; then cp AppIcon.icns "$APP/Contents/Resources/"; fi
+if [ -f AppIcon.icns ]; then cp AppIcon.icns "$APP/Contents/Resources/CogitatorIcon.icns"; fi
 codesign --force --deep --sign - "$APP"
 codesign --verify --deep --strict "$APP"
 printf 'Built: %s\n' "$APP"
