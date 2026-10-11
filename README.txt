@@ -139,3 +139,39 @@ and Rogue Trader's cogitator/data altar imagery. No external artwork is bundled.
 Validation: 14 tests passed; main window and ToyBox update preview inspected.
 No installation into the game was performed during this design verification.
 The build script accepts optional Swift build arguments for restricted environments.
+
+Local preflight checks (10.10.2026)
+---------------------------------
+The package preview and installed list now report missing, disabled or outdated
+dependencies, unknown version metadata, and local version downgrades. UMM
+requirements accept Id-Version syntax; Owlcat Dependencies accept string lists.
+Unreadable declarations are visible warnings. No dependency downloads are made.
+MicroPatches is an advisory for Owlcat blueprint/bundle content when an active
+UMM MicroPatches installation is absent; it is not universally required or
+automatically installed. Users must check the individual mod's requirements.
+Manifest filenames are recognized regardless of capitalization; ambiguous names
+are rejected and UMM retains priority in dual-manifest packages.
+Binary headers distinguish native Windows PE, managed IL-only PE and Linux ELF.
+Truncated/unsupported PE headers produce an unknown-format warning. This does not
+verify managed code's P/Invoke dependencies, Harmony patches or game compatibility.
+AssetBundle detection uses file signatures and content in Bundles, including
+lowercase directories; empty directories do not trigger a bundle warning.
+Windows-specific paths are flagged. The serialized bundle target is not decoded;
+other bundles remain explicitly unverified, including purported macOS builds.
+Preview warnings require acknowledgement. New warnings discovered by a fresh
+installed-mod scan abort before creating backups or changing files. Activation
+changes warn when enabling a mod with issues or disabling a needed dependency.
+Validation: 23 tests passed, including nine new preflight regression tests.
+
+Automatische Bestandsaktualisierung
+----------------------------------
+Das geöffnete Fenster prüft alle zwei Sekunden die Mod-Verzeichnisse,
+Manifeste und Owlcat-/UMM-Aktivierungskonfigurationen des gewählten
+Spielordners. Externe Installationen, Updates, Löschungen und Aktivierungen
+erscheinen nach zwei stabilen Prüfungen (normalerweise innerhalb von vier
+Sekunden). Die Paketdateien werden nur bei verändertem Bestand geprüft.
+Während eigener Vorgänge, Installationsvorschauen, Bestätigungen und
+Fehler-/Dateidialogen bleibt die Liste unverändert. Nach deren Abschluss
+wird die Prüfung automatisch fortgesetzt. Unvollständige externe Schreib-
+vorgänge werden still erneut geprüft; sie ersetzen die letzte lesbare Liste
+nicht und öffnen keine zusätzlichen Dialoge.

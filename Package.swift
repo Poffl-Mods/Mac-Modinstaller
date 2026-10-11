@@ -7,5 +7,6 @@ let package = Package(
     targets: [
         .target(name: "ModCore", dependencies: ["ZIPFoundation"], resources: [.process("Resources")]),
         .executableTarget(name: "RogueModInstaller", dependencies: ["ModCore"]),
-        .testTarget(name: "ModCoreTests", dependencies: ["ModCore", "ZIPFoundation"])
+        .testTarget(name: "ModCoreTests", dependencies: ["ModCore", "ZIPFoundation"]),
+        .testTarget(name: "InstallerTests", dependencies: ["RogueModInstaller", "ModCore", "ZIPFoundation"])
     ])

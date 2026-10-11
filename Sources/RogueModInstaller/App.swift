@@ -3,96 +3,6 @@ import AppKit
 import UniformTypeIdentifiers
 import ModCore
 
-@MainActor final class InstallerModel: ObservableObject {
-    @Published var root: URL?
-    @Published var mods: [Mod] = []
-    @Published var busy = false
-    @Published var status = Message("ZIP hinzufügen, prüfen, installieren.")
-    @Published var language: AppLanguage = AppLanguage(rawValue: UserDefaults.standard.string(forKey: "interfaceLanguage") ?? "de") ?? .de {
-        didSet { UserDefaults.standard.set(language.rawValue, forKey: "interfaceLanguage") }
-    }
-    func t(_ key: String, _ args: String...) -> String { Localization.text(key, language: language, arguments: args) }
-    func render(_ message: Message) -> String { Localization.text(message.key, language: language, arguments: message.arguments) }
-    func cancelPreview() { preview = nil; if !busy { status = Message("ZIP hinzufügen, prüfen, installieren.") } }
-    @Published var error: String?
-    @Published var preview: PreparedMod?
-    @Published var filter = ""
-    var lastBackup: URL?
-    let work = DispatchQueue(label: "de.poffl.roguemods.install", qos: .userInitiated)
-    init() {
-        if let saved = UserDefaults.standard.string(forKey: "gameData"), ModIO.isGameData(URL(fileURLWithPath: saved)) { root = URL(fileURLWithPath: saved) }
-        else { let found = ModIO.candidates(); if found.count == 1 { root = found.first } }
-        refresh()
-    }
-    func refresh() {
-        guard let root else { status = Message("Spielordner wählen oder Rogue Trader einmal starten."); mods = []; return }
-        do { mods = try ModIO.installed(root: root) }
-        catch { self.error = Localization.error(error, language: self.language) }
-    }
-    func chooseRoot() {
-        let panel = NSOpenPanel(); panel.title = t("Rogue-Trader-Benutzerdaten wählen")
-        panel.message = t("Ordner mit Modifications, UnityModManager oder Saved Games auswählen.")
-        panel.prompt = t("Auswählen"); panel.canChooseDirectories = true; panel.canChooseFiles = false
-        panel.directoryURL = root ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support")
-        if panel.runModal() == .OK, let url = panel.url {
-            guard ModIO.isGameData(url) else { error = t("Das ist kein erkennbarer Rogue-Trader-Benutzerdatenordner."); return }
-            root = url; UserDefaults.standard.set(url.path, forKey: "gameData"); refresh()
-        }
-    }
-    func chooseZIP() {
-        let panel = NSOpenPanel(); panel.title = t("Mod-ZIP hinzufügen"); panel.allowedContentTypes = [.zip]
-        panel.prompt = t("Auswählen"); panel.allowsMultipleSelection = false
-        if panel.runModal() == .OK, let url = panel.url { prepare(url) }
-    }
-    func prepare(_ url: URL) {
-        guard !busy, preview == nil else { return }
-        busy = true; status = Message("ZIP wird geprüft …")
-        work.async {
-            let result = Result { try ModIO.prepare(url) }
-            DispatchQueue.main.async {
-                self.busy = false
-                switch result {
-                case .success(let package): self.preview = package; self.status = Message("Bereit zur Installation.")
-                case .failure(let error): self.error = Localization.error(error, language: self.language); self.status = Message("ZIP konnte nicht hinzugefügt werden.")
-                }
-            }
-        }
-    }
-    func ensureGameClosed() -> Bool {
-        let running = NSWorkspace.shared.runningApplications.contains {
-            let name = $0.executableURL?.lastPathComponent.lowercased() ?? ""
-            let bundle = $0.bundleIdentifier?.lowercased() ?? ""
-            return name == "wh40krt" || bundle.contains("warhammer-40000-rogue-trader") || bundle.contains("roguetrader")
-        }
-        if running { error = t("Bitte Rogue Trader vollständig beenden, damit das Spiel die Einstellungen nicht überschreibt.") }
-        return !running
-    }
-    func install() {
-        guard let package = preview, let root, !busy, ensureGameClosed() else { return }
-        preview = nil; busy = true; status = Message("{0} wird installiert …", package.mod.name)
-        work.async {
-            let result = Result { try ModIO.install(package, root: root) }
-            DispatchQueue.main.async { self.complete(result, success: Message("{0} installiert und aktiviert. Spiel neu starten.", package.mod.name)) }
-        }
-    }
-    func toggle(_ mod: Mod) {
-        guard let root, !busy, ensureGameClosed() else { return }
-        busy = true; status = Message("Aktivierung wird gespeichert …")
-        work.async {
-            let result = Result { try ModIO.setEnabled(mod, root: root, enabled: !mod.enabled) }
-            DispatchQueue.main.async { self.complete(result, success: Message(mod.enabled ? "{0} deaktiviert. Spiel neu starten." : "{0} aktiviert. Spiel neu starten.", mod.name)) }
-        }
-    }
-    func complete(_ result: Result<URL, Error>, success: Message) {
-        busy = false
-        switch result {
-        case .success(let backup): lastBackup = backup; status = success
-        case .failure(let failure): error = Localization.error(failure, language: language); status = Message("Änderung nicht abgeschlossen.")
-        }
-        refresh()
-    }
-}
-
 @main struct RogueModInstallerApp: App {
     @StateObject var model = InstallerModel()
     init() {
@@ -107,6 +17,7 @@ import ModCore
             MainView(model: model).frame(minWidth: 860, minHeight: 700)
                 .environment(\.locale, Locale(identifier: model.language.rawValue))
                 .onOpenURL { model.prepare($0) }
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in model.refreshAutomatically() }
         }
         .defaultSize(width: 1000, height: 790)
         .commands { CommandGroup(replacing: .newItem) { Button(model.t("Mod-ZIP hinzufügen …")) { model.chooseZIP() }.keyboardShortcut("o").disabled(model.busy || model.preview != nil) } }
@@ -136,6 +47,12 @@ struct MainView: View {
             .sheet(isPresented: Binding(get: { model.preview != nil }, set: { if !$0 { model.cancelPreview() } })) {
                 if let package = model.preview { PreviewView(model: model, package: package) }
             }
+            .confirmationDialog(model.t("Prüfhinweise"), isPresented: Binding(get: { model.pendingToggle != nil }, set: { if !$0 { model.pendingToggle = nil } }), titleVisibility: .visible) {
+                Button(model.t("Trotzdem fortfahren")) {
+                    if let mod = model.pendingToggle { model.pendingToggle = nil; model.applyToggle(mod) }
+                }
+                Button(model.t("Abbrechen"), role: .cancel) { model.pendingToggle = nil }
+            } message: { Text(model.toggleWarnings.map { model.render($0.message) }.joined(separator: "\n\n")) }
             .alert(model.t("Bitte prüfen"), isPresented: Binding(get: { model.error != nil }, set: { if !$0 { model.error = nil } })) {
                 Button(model.t("OK")) { model.error = nil }
             } message: { Text(model.error ?? "") }
@@ -216,7 +133,7 @@ struct MainView: View {
                 }.font(.system(size: 12)).padding(8).frame(width: 180)
                     .background(Forge.void).overlay(Rectangle().stroke(Forge.brass.opacity(0.25)))
                 Button { model.refresh() } label: { Image(systemName: "arrow.clockwise") }
-                    .accessibilityLabel(model.t("Liste aktualisieren")).help(model.t("Liste aktualisieren")).disabled(model.busy)
+                    .accessibilityLabel(model.t("Liste aktualisieren")).help(model.t("Liste aktualisieren")).disabled(model.busy || model.preview != nil || model.pendingToggle != nil || model.error != nil)
             }.padding(14)
             Rectangle().fill(Forge.brass.opacity(0.25)).frame(height: 1)
             ScrollView {
@@ -247,6 +164,7 @@ struct MainView: View {
                 Text(mod.name).font(.system(size: 14, weight: .semibold))
                 Text(model.t("Version {0}  ·  {1}", mod.version, mod.kind.rawValue))
                     .font(.system(size: 11, design: .monospaced)).foregroundStyle(Forge.muted)
+                WarningList(model: model, warnings: model.warnings(mod))
             }
             Spacer()
             Button { NSWorkspace.shared.open(mod.folder) } label: { Image(systemName: "folder") }
@@ -279,6 +197,8 @@ struct MainView: View {
 struct PreviewView: View {
     @ObservedObject var model: InstallerModel
     let package: PreparedMod
+    @State private var acknowledged = false
+    var checks: [ModWarning] { model.warnings(package.mod, replacing: existing) }
     var existing: Mod? { model.mods.first { $0.id == package.mod.id } }
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -290,29 +210,56 @@ struct PreviewView: View {
                         .font(.system(size: 24, weight: .semibold, design: .serif))
                 }
             }
-            VStack(alignment: .leading, spacing: 12) {
-                Text(package.mod.name).font(.system(size: 18, weight: .semibold, design: .serif))
-                Text(model.t("Version {0} · {1} · {2}", package.mod.version, package.mod.kind.rawValue, (Double(package.size) / 1_000_000).formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: model.language.rawValue))) + " MB"))
-                    .font(.system(size: 12, design: .monospaced)).foregroundStyle(Forge.muted)
-                if let existing { Text(model.t("Installiert: {0}. Die bisherige Version wird gesichert.", existing.version)).font(.callout) }
-                Label(model.t("Wird installiert und aktiviert"), systemImage: "checkmark.circle").foregroundStyle(Forge.phosphor)
-                Text(model.t("Ziel: {0}", package.mod.kind.folder + "/" + (existing?.folder.lastPathComponent ?? package.mod.key)))
-                    .font(.system(size: 12, design: .monospaced)).textSelection(.enabled)
-                if !package.mod.requirements.isEmpty { Text(model.t("Benötigt: {0}", package.mod.requirements.joined(separator: ", "))).font(.callout) }
-            }.frame(maxWidth: .infinity, alignment: .leading).padding(18).forgePanel()
-            if package.hasBundles {
-                Label(model.t("Enthält AssetBundles. Verwende eine für macOS geeignete Ausgabe."), systemImage: "shippingbox").font(.callout).foregroundStyle(Forge.brass)
-            } else if package.mod.kind == .umm {
-                Text(model.t("Die Spiel- und Harmony-Kompatibilität bestimmt der Mod. Die App installiert das Paket in den vorhandenen UMM.")).font(.callout).foregroundStyle(Forge.muted)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(package.mod.name).font(.system(size: 18, weight: .semibold, design: .serif))
+                        Text(model.t("Version {0} · {1} · {2}", package.mod.version, package.mod.kind.rawValue, (Double(package.size) / 1_000_000).formatted(.number.precision(.fractionLength(1)).locale(Locale(identifier: model.language.rawValue))) + " MB"))
+                            .font(.system(size: 12, design: .monospaced)).foregroundStyle(Forge.muted)
+                        if let existing { Text(model.t("Installiert: {0}. Die bisherige Version wird gesichert.", existing.version)).font(.callout) }
+                        Label(model.t("Wird installiert und aktiviert"), systemImage: "checkmark.circle").foregroundStyle(Forge.phosphor)
+                        Text(model.t("Ziel: {0}", package.mod.kind.folder + "/" + (existing?.folder.lastPathComponent ?? package.mod.key)))
+                            .font(.system(size: 12, design: .monospaced)).textSelection(.enabled)
+                        if !package.mod.requirements.isEmpty { Text(model.t("Benötigt: {0}", package.mod.requirements.joined(separator: ", "))).font(.callout) }
+                    }.frame(maxWidth: .infinity, alignment: .leading).padding(18).forgePanel()
+                    if !checks.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text(model.t("Prüfhinweise")).font(.headline)
+                            WarningList(model: model, warnings: checks)
+                        }.frame(maxWidth: .infinity, alignment: .leading).padding(16).forgePanel()
+                    }
+                    if package.mod.kind == .umm {
+                        Text(model.t("Die Spiel- und Harmony-Kompatibilität bestimmt der Mod. Die App installiert das Paket in den vorhandenen UMM.")).font(.callout).foregroundStyle(Forge.muted)
+                    }
+                    if model.root == nil { Text(model.t("Bitte zuerst im Hauptfenster den Spielordner auswählen.")).foregroundStyle(Forge.brass) }
+                }
+            }.frame(maxHeight: 440)
+            if !checks.isEmpty {
+                Toggle(model.t("Hinweise gelesen; trotzdem installieren."), isOn: $acknowledged)
+                    .toggleStyle(.checkbox).font(.callout)
             }
-            if model.root == nil { Text(model.t("Bitte zuerst im Hauptfenster den Spielordner auswählen.")).foregroundStyle(Forge.brass) }
             HStack {
                 Button(model.t("Abbrechen")) { model.cancelPreview() }.keyboardShortcut(.cancelAction)
                 Spacer()
-                Button(existing == nil ? model.t("Installieren") : model.t("Aktualisieren"), action: model.install)
-                    .buttonStyle(ForgeButtonStyle(prominent: true)).disabled(model.root == nil).keyboardShortcut(.defaultAction)
+                Button(existing == nil ? model.t("Installieren") : model.t("Aktualisieren")) { model.install(acceptedWarnings: Set(checks.map(\.id))) }
+                    .buttonStyle(ForgeButtonStyle(prominent: true)).disabled(model.root == nil || (!checks.isEmpty && !acknowledged)).keyboardShortcut(.defaultAction)
             }.padding(.top, 6)
-        }.padding(28).frame(width: 560).background(CogitatorBackdrop())
+        }.padding(28).frame(width: 600).background(CogitatorBackdrop())
+            .onChange(of: checks.map(\.id)) { _ in acknowledged = false }
             .foregroundStyle(Forge.parchment).buttonStyle(ForgeButtonStyle()).preferredColorScheme(.dark)
+    }
+}
+
+struct WarningList: View {
+    @ObservedObject var model: InstallerModel
+    let warnings: [ModWarning]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            ForEach(warnings) { warning in
+                Label(model.render(warning.message), systemImage: "exclamationmark.triangle")
+                    .font(.system(size: 11)).foregroundStyle(Forge.brass)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
     }
 }

@@ -19,6 +19,8 @@ public struct Mod: Identifiable, Sendable {
     public let folder: URL
     public var enabled: Bool
     public let requirements: [String]
+    public var packageWarnings: [ModWarning] = []
+    public var hasOwlcatContent = false
 }
 public final class PreparedMod: Sendable {
     public let mod: Mod
@@ -55,14 +57,20 @@ public enum ModIO {
         && id.rangeOfCharacter(from: CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "_-. ")).inverted) == nil
         && id == id.trimmingCharacters(in: .whitespacesAndNewlines)
     }
+    static func manifest(_ name: String, in folder: URL) throws -> URL? {
+        let matches = try fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)
+            .filter { $0.lastPathComponent.lowercased() == name.lowercased() }
+        guard matches.count <= 1 else { throw ModError("Mehrdeutiger Manifest-Dateiname: {0}", name) }
+        return matches.first
+    }
     public static func readMod(_ folder: URL) throws -> Mod? {
-        let umm = folder.appendingPathComponent("Info.json")
-        let owl = folder.appendingPathComponent("OwlcatModificationManifest.json")
+        let umm = try manifest("Info.json", in: folder)
+        let owl = try manifest("OwlcatModificationManifest.json", in: folder)
         let kind: ModKind
         let metadata: [String: Any]
         // UMM packages often include an Owlcat manifest for Steam Workshop as well.
-        if fm.fileExists(atPath: umm.path) { kind = .umm; metadata = try json(umm) }
-        else if fm.fileExists(atPath: owl.path) { kind = .owlcat; metadata = try json(owl) }
+        if let umm { kind = .umm; metadata = try json(umm) }
+        else if let owl { kind = .owlcat; metadata = try json(owl) }
         else { return nil }
         guard let key = metadata[kind == .umm ? "Id" : "UniqueName"] as? String, validID(key) else {
             throw ModError("Der Mod enthält keine gültige Kennung.")
@@ -74,9 +82,15 @@ public enum ModIO {
                 throw ModError("Die in Info.json angegebene Mod-DLL fehlt.")
             }
         }
-        return Mod(key: key, name: metadata["DisplayName"] as? String ?? key,
+        var mod = Mod(key: key, name: metadata["DisplayName"] as? String ?? key,
                    version: metadata["Version"] as? String ?? "?", kind: kind, folder: folder, enabled: false,
                    requirements: metadata[kind == .umm ? "Requirements" : "Dependencies"] as? [String] ?? [])
+        let checks = try ModChecks.inspect(folder)
+        mod.packageWarnings = checks.warnings; mod.hasOwlcatContent = checks.content
+        if let raw = metadata[kind == .umm ? "Requirements" : "Dependencies"], !(raw is [String]) {
+            mod.packageWarnings.append(ModWarning("requirements-metadata", "Abhängigkeiten im Manifest sind nicht lesbar."))
+        }
+        return mod
     }
     public static func prepare(_ zip: URL) throws -> PreparedMod {
         guard zip.pathExtension.lowercased() == "zip" else { throw ModError("Bitte eine ZIP-Datei auswählen.") }
@@ -123,7 +137,7 @@ public enum ModIO {
             let enumerator = fm.enumerator(at: temp, includingPropertiesForKeys: [.isDirectoryKey])!
             var roots = Set<URL>()
             for case let url as URL in enumerator {
-                if ["Info.json", "OwlcatModificationManifest.json"].contains(url.lastPathComponent) {
+                if ["info.json", "owlcatmodificationmanifest.json"].contains(url.lastPathComponent.lowercased()) {
                     roots.insert(url.deletingLastPathComponent())
                 }
             }
@@ -137,7 +151,7 @@ public enum ModIO {
                     throw ModError("Zusätzliche Dateien außerhalb des Mod-Ordners. Bitte ein einzelnes Mod-Paket verwenden.")
                 }
             }
-            let bundles = fm.fileExists(atPath: root.appendingPathComponent("Bundles").path)
+            let bundles = mod.packageWarnings.contains { $0.code == "bundles" }
             return PreparedMod(mod: mod, hasBundles: bundles, size: total, temp: temp)
         } catch { try? fm.removeItem(at: temp); throw error }
     }
@@ -224,7 +238,7 @@ public enum ModIO {
         guard Set(result.map(\.id)).count == result.count else { throw ModError("Eine Mod-Kennung ist mehrfach installiert.") }
         return result.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
-    public static func install(_ package: PreparedMod, root: URL) throws -> URL {
+    public static func install(_ package: PreparedMod, root: URL, acceptedWarnings: Set<String>? = nil) throws -> URL {
         guard isGameData(root) else { throw ModError("Bitte den Rogue-Trader-Benutzerdatenordner auswählen.") }
         let mods = try installed(root: root)
         if package.mod.kind == .umm {
@@ -233,6 +247,12 @@ public enum ModIO {
             }
         }
         let existing = mods.first { $0.id == package.mod.id }
+        if let acceptedWarnings {
+            let current = ModChecks.warnings(for: package.mod, installed: mods, replacing: existing)
+            guard Set(current.map(\.id)).isSubset(of: acceptedWarnings) else {
+                throw ModError("Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.")
+            }
+        }
         let target = existing?.folder ?? root.appendingPathComponent(package.mod.kind.folder).appendingPathComponent(package.mod.key)
         if existing == nil && fm.fileExists(atPath: target.path) { throw ModError("Der Zielordner existiert, gehört aber nicht eindeutig zu diesem Mod.") }
         let config = configURL(package.mod.kind, root: root)

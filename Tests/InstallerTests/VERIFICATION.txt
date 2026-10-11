@@ -1,0 +1,38 @@
+Versionsanzeige / automatische Bestandsaktualisierung — 2026-10-11
+
+Ursache:
+Das bereits geöffnete Fenster war mit dem vom Nutzer angegebenen Owlcat-
+Spielordner verbunden. Es zeigte 0.4.9, während dessen Manifest 0.4.11 enthielt.
+InstallerModel las die Liste bisher nur bei Start/manuellem Refresh/eigenen
+Änderungen ein. ModIO.installed liest die Version korrekt aus dem Manifest.
+
+Automatisierte Prüfung:
+23 vorhandene ModCore-/Lokalisierungs-/ModChecks-Tests bestanden.
+6 neue InstallerTests bestanden: externe Owlcat-Updates, Aktivierungswechsel,
+Hinzufügen/Entfernen, Spielordnerwechsel, UMM-Installation/-Aktivierung,
+Pause bei busy/Vorschau/Bestätigung/Fehler, veraltete ausstehende Leseergebnisse,
+gleich große/atomare Dateiersetzungen und temporär unlesbare Konfiguration.
+Der präzisierte Test für ausstehende Leseergebnisse wurde separat erneut
+bestanden. Release-App gebaut und codesign --verify --deep --strict bestanden.
+
+Befehl (Caches innerhalb des Projekts):
+CLANG_MODULE_CACHE_PATH="$PWD/.build/ModuleCache" \
+SWIFTPM_MODULECACHE_OVERRIDE="$PWD/.build/ModuleCache" \
+swift test --disable-sandbox
+
+Live-Prüfung mit geöffneter Release-App:
+1. Separaten Spielordner unter .build/InventoryVerification/Game angelegt.
+   Synthetisches ArmouryOrks-Paket 0.4.9 über ModIO.prepare/install installiert.
+2. Installer mit diesem Ordner verbunden: Anzeige 0.4.9 / Enabled.
+3. Externen separaten Prozess mit dem vorhandenen ModCore gestartet:
+   ModIO.install auf 0.4.11; anschließend ModIO.setEnabled(false).
+4. Ohne Refresh-Klick/Neustart: Anzeige automatisch 0.4.11 / Disabled.
+5. Installationsvorschau für synthetische Version 0.4.12 geöffnet.
+   Extern auf 0.4.12 aktualisiert und aktiviert. Vorschau blieb unverändert
+   (Installed: 0.4.11); kein neuer Dialog, kein Verlust der Vorschau.
+6. Vorschau abgebrochen: Liste automatisch auf 0.4.12 / Enabled aktualisiert.
+7. Echten Spielordner wieder verbunden: Armoury: Orks 0.4.11 / Enabled,
+   MicroPatches 1.21.1 / Enabled und ToyBox 1.7.34 / Enabled.
+
+Die produktiven Mod-Dateien wurden für die Prüfung nicht verändert.
+Vorhandene uncommittete ModChecks-/Übersetzungs-/UI-Änderungen erhalten.
