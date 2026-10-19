@@ -1,4 +1,4 @@
-Mac-ModInstaller 1.0
+Mac-ModInstaller 1.0.1
 ====================
 A native Apple Silicon mod installer for Warhammer 40,000: Rogue Trader.
 
@@ -101,5 +101,5 @@ Swift / SwiftUI; ZIPFoundation 0.9.20 (MIT). After obtaining permission to build
 or modify the source: swift test, then ./build-app.sh.
 The script accepts additional Swift build options. Release output:
 dist/Mac-ModInstaller.app. Create the distributable ZIP and SHA-256 checksum with ./package-release.sh.
-38 automated tests passed for version 1.0.0. Historical validation notes:
+38 automated tests passed for version 1.0.1. Historical validation notes:
 DEVELOPMENT-NOTES.txt.
