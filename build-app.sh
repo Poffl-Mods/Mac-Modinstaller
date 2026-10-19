@@ -2,11 +2,15 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 swift build -c release "$@"
-APP="$PWD/dist/Mac-ModInstaller.app"
+BIN_DIR="$(swift build -c release "$@" --show-bin-path)"
+mkdir -p "$PWD/dist"
+STAGE=$(mktemp -d "$PWD/dist/.app-build.XXXXXX")
+trap 'rm -rf "$STAGE"' EXIT
+APP="$STAGE/Mac-ModInstaller.app"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp .build/release/RogueModInstaller "$APP/Contents/MacOS/RogueModInstaller"
+cp "$BIN_DIR/RogueModInstaller" "$APP/Contents/MacOS/RogueModInstaller"
 # SwiftPM resource bundle, when supplied by ZIPFoundation.
-for bundle in .build/release/*.bundle; do
+for bundle in "$BIN_DIR"/*.bundle; do
   if [ -d "$bundle" ]; then cp -R "$bundle" "$APP/Contents/Resources/"; fi
 done
 if [ -f "$APP/Contents/Resources/ZIPFoundation-LICENSE.txt" ]; then chmod u+w "$APP/Contents/Resources/ZIPFoundation-LICENSE.txt"; fi
@@ -20,8 +24,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <key>CFBundleName</key><string>Mac-ModInstaller</string>
 <key>CFBundleDisplayName</key><string>Mac-ModInstaller</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.2.0</string>
-<key>CFBundleVersion</key><string>2</string>
+<key>CFBundleShortVersionString</key><string>1.0.0</string>
+<key>CFBundleVersion</key><string>100</string>
 <key>CFBundleLocalizations</key><array><string>en</string><string>de</string><string>fr</string><string>es</string><string>ru</string><string>zh-Hans</string></array>
 <key>LSMinimumSystemVersion</key><string>13.0</string>
 <key>NSHighResolutionCapable</key><true/>
@@ -35,6 +39,10 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 </dict></plist>
 PLIST
 if [ -f AppIcon.icns ]; then cp AppIcon.icns "$APP/Contents/Resources/CogitatorIcon.icns"; fi
+cp LICENSE THIRD-PARTY-NOTICES.txt "$APP/Contents/Resources/"
 codesign --force --deep --sign - "$APP"
 codesign --verify --deep --strict "$APP"
-printf 'Built: %s\n' "$APP"
+DEST="$PWD/dist/Mac-ModInstaller.app"
+rm -rf "$DEST"
+mv "$APP" "$DEST"
+printf 'Built: %s\n' "$DEST"

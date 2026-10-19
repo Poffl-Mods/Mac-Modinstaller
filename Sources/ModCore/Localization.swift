@@ -21,8 +21,15 @@ public struct Message: Sendable {
     public init(_ key: String, _ arguments: String...) { self.key = key; self.arguments = arguments }
 }
 public enum Localization {
+    // SwiftPM's native build accessor searches next to the executable and then
+    // in the development tree. Distributed .app resources live in Contents/Resources.
+    static func packagedResources(in app: Bundle) -> Bundle? {
+        guard let url = app.resourceURL?.appendingPathComponent("RogueModInstaller_ModCore.bundle") else { return nil }
+        return Bundle(url: url)
+    }
     static let catalog: [String: [String: String]] = {
-        guard let url = Bundle.module.url(forResource: "Translations", withExtension: "json"),
+        let resources = packagedResources(in: Bundle.main) ?? Bundle.module
+        guard let url = resources.url(forResource: "Translations", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let catalog = try? JSONDecoder().decode([String: [String: String]].self, from: data) else { return [:] }
         return catalog

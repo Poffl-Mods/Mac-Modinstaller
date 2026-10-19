@@ -164,6 +164,7 @@ struct MainView: View {
                 Text(mod.name).font(.system(size: 14, weight: .semibold))
                 Text(model.t("Version {0}  ·  {1}", mod.version, mod.kind.rawValue))
                     .font(.system(size: 11, design: .monospaced)).foregroundStyle(Forge.muted)
+                BundlePlatformList(model: model, platforms: mod.bundlePlatforms)
                 WarningList(model: model, warnings: model.warnings(mod))
             }
             Spacer()
@@ -222,6 +223,7 @@ struct PreviewView: View {
                             .font(.system(size: 12, design: .monospaced)).textSelection(.enabled)
                         if !package.mod.requirements.isEmpty { Text(model.t("Benötigt: {0}", package.mod.requirements.joined(separator: ", "))).font(.callout) }
                     }.frame(maxWidth: .infinity, alignment: .leading).padding(18).forgePanel()
+                    BundlePlatformList(model: model, platforms: package.mod.bundlePlatforms)
                     if !checks.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             Text(model.t("Prüfhinweise")).font(.headline)
@@ -258,6 +260,20 @@ struct WarningList: View {
             ForEach(warnings) { warning in
                 Label(model.render(warning.message), systemImage: "exclamationmark.triangle")
                     .font(.system(size: 11)).foregroundStyle(Forge.brass)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+}
+
+struct BundlePlatformList: View {
+    @ObservedObject var model: InstallerModel
+    let platforms: [BundlePlatform]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            ForEach(platforms.filter { !$0.targets.isEmpty }) { platform in
+                Text(model.t("Bundle-Zielplattform: {0} · {1}. Keine Garantie der Spielkompatibilität.", platform.path, platform.description))
+                    .font(.system(size: 11)).foregroundStyle(Forge.muted)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }

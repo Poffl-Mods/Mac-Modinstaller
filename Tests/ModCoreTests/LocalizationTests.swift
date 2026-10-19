@@ -20,6 +20,23 @@ final class LocalizationTests: XCTestCase {
             }
         }
     }
+    func testDistributedAppFindsPackagedResourcesOutsideBuildTree() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let app = root.appendingPathComponent("Portable.app")
+        let resources = app.appendingPathComponent("Contents/Resources/RogueModInstaller_ModCore.bundle")
+        try FileManager.default.createDirectory(at: resources, withIntermediateDirectories: true)
+        let plist: [String: Any] = ["CFBundleIdentifier": "test.portable", "CFBundlePackageType": "APPL", "CFBundleExecutable": "Portable"]
+        try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
+            .write(to: app.appendingPathComponent("Contents/Info.plist"))
+        let translations = Data(#"{"en":{"key":"Packaged translation"}}"#.utf8)
+        try translations.write(to: resources.appendingPathComponent("Translations.json"))
+        let bundle = try XCTUnwrap(Bundle(url: app))
+        let packaged = try XCTUnwrap(Localization.packagedResources(in: bundle))
+        let url = try XCTUnwrap(packaged.url(forResource: "Translations", withExtension: "json"))
+        XCTAssertEqual(try Data(contentsOf: url), translations)
+        XCTAssertTrue(url.path.hasPrefix(root.path))
+    }
     func testDynamicArgumentsAreNotTranslatedOrReinterpreted() {
         let name = "Orks {1}"
         XCTAssertEqual(Localization.text("Version {0}  ·  {1}", language: .es, arguments: [name, "UMM"]), "Versión Orks {1}  ·  UMM")

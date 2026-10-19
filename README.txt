@@ -1,177 +1,105 @@
-Mac-ModInstaller
-================
-Native Apple Silicon mod installer for Warhammer 40,000: Rogue Trader.
+Mac-ModInstaller 1.0
+====================
+A native Apple Silicon mod installer for Warhammer 40,000: Rogue Trader.
 
-STATUS: Work in progress. No public release is available yet.
-The local development build is 0.2.0. Application binaries, game files, third-party
-mod ZIPs and local test logs are intentionally excluded from this repository.
+Requirements
+- Apple Silicon Mac (M1 or newer), macOS 13 Ventura or newer.
+- A local Rogue Trader installation. Intel Macs are not supported by this build.
+- No Unity, Xcode, Python or Rosetta required to run the application.
 
-PERMISSION REQUIRED
-Publicly visible does not mean freely usable. Original project code and materials
-are all rights reserved. Ask Poffl for express written permission before using,
-modifying or distributing them. See LICENSE for the terms and GitHub-platform
-exceptions; third-party dependencies retain their respective licenses.
-Permission requests: https://github.com/Poffl-Mods/Mac-Modinstaller/issues
+Quick start
+1. Extract the release ZIP and move Mac-ModInstaller.app to Applications.
+2. Close Rogue Trader, then open Mac-ModInstaller.
+3. The app looks for the game's user-data folder automatically. If necessary,
+   choose it manually with the folder button. Do not select the game .app.
+4. Drag one mod ZIP into the app or use the ZIP picker.
+5. Review the destination, dependencies and compatibility warnings, then install.
+6. Restart the game. The list shows configured activation, not successful
+   runtime loading. Only install mods from sources you trust.
+
+Opening the application
+This release is locally ad-hoc signed, not Developer ID signed or notarized
+by Apple. macOS may block the first launch. If you trust the download, follow
+Apple's instructions for allowing this particular application through
+System Settings > Privacy & Security > Open Anyway:
+https://support.apple.com/102445
+Do not disable Gatekeeper globally. Managed Macs may prohibit exceptions.
 
 Features
-- Automatically locate Rogue Trader user data, with manual folder selection.
-- Add one mod ZIP via drag-and-drop or the native file picker.
-- Detect Owlcat and UMM formats, including dual-manifest packages.
-- Install/update mods and edit Owlcat JSON or UMM Params.xml activation settings.
-- List/search installed mods, enable/disable them, and retain backups.
+- Owlcat and UnityModManager packages, including dual-manifest ZIPs.
+- Install/update, enable/disable, installed-mod search and Finder access.
+- Automatic inventory refresh when other tools change installed mods.
+- Backups and rollback for failed installations/updates.
+- Dependency/version checks and local platform checks.
+- Bundle target platforms read from supported UnityFS metadata.
 - English, German, French, Spanish, Russian and Simplified Chinese UI.
-- Runs natively on Apple Silicon; no Rosetta, Unity or Python runtime required.
+- Adeptus Mechanicus-inspired cogitator appearance and original icon.
 
-Development (after obtaining permission)
-Open Package.swift in Xcode, or run swift test and ./build-app.sh.
-The app is built at dist/Mac-ModInstaller.app. Builds use local ad-hoc signing;
-public distribution and notarization are not configured.
+Compatibility checks
+Native Windows/Linux binaries, missing or outdated dependencies, version
+downgrades and Windows-specific bundle paths produce warnings. Supported
+UnityFS bundles report their serialized target platforms; Windows/Linux and
+recognized mobile/console targets produce specific warnings. File names are
+not treated as proof of platform compatibility.
 
-Validation
-14 tests passed on the development Mac, including localization coverage,
-installation/update behavior, config preservation and rollback.
-Real ToyBox, ReDress and Armoury: Orks ZIPs were tested in isolated directories.
-Those external packages are not distributed here. Their optional local smoke
-checks require the external packages; the remaining tests create their own fixtures.
-UI folder detection, ZIP selection and language changes were checked locally.
-Game/Harmony compatibility is not guaranteed by installation alone.
+Supported bundle inspection: UnityFS 6-8, uncompressed/LZ4/LZ4HC blocks,
+SerializedFile 9-22. LZMA, legacy UnityRaw/UnityWeb, unknown/encrypted formats,
+invalid data and files exceeding inspection limits remain explicitly unverified.
+A macOS target does not guarantee working shaders, Harmony patches, native
+libraries, game-version compatibility or successful loading in the game.
+The installer does not convert bundles or modify Harmony/the mod loader.
 
-Next session
-- Exercise Finder drag-and-drop end to end.
-- Test UMM mods in the game; keep loader/Harmony compatibility separate.
-- Review remaining failure cases and backup recovery UX before a release.
-- Decide on future scope without adding a download catalog or load-order editor
-  to this first version unless needed.
+Backups
+Before changes, configuration files are backed up under "RogueModInstaller
+Backups" in the selected game's user-data folder. Updates also back up the
+previous mod directory. Backups are not deleted automatically.
 
-Deutsche Bedienungs- und Entwicklungsnotizen
-------------------------------------------
-Mac-ModInstaller 0.2.0 — lokaler Modinstaller für Rogue Trader
+To restore manually, close both game and installer. Restore configuration files
+to the paths recorded in Restore.json. For an update, move the current mod
+folder aside and copy PreviousMod back to the recorded modFolder path. Review
+other mods installed since that backup because the restored activation
+configuration reflects the older state. Save games are not included in backups.
+An ordinary installation error triggers rollback; an interruption or power loss
+can require manual recovery from the retained backup.
 
-Start: dist/Mac-ModInstaller.app öffnen. Die App läuft nativ auf Apple Silicon.
+Scope
+One mod per ZIP. No download catalog, dependency downloads, automatic updates,
+load-order editor, uninstall button or Steam Workshop management. Dependencies
+must be installed separately. Maximum 4 GB extracted / 100,000 ZIP entries;
+unsafe paths, symbolic links and ambiguous packages are rejected.
 
-Bedienung
-1. Rogue Trader vollständig beenden.
-2. Der Benutzerdatenordner wird automatisch gefunden. Bei mehreren Treffern oder
-   einem abweichenden Speicherort über „Ändern …“ auswählen.
-3. Eine Mod-ZIP in das Feld ziehen oder über „ZIP auswählen …“ öffnen.
-4. Name, Version und Ziel prüfen, dann „Installieren“ bzw. „Aktualisieren“ klicken.
-5. Das Spiel neu starten. Die Mod-Liste zeigt die konfigurierte Aktivierung,
-   nicht eine Bestätigung, dass das Spiel den Mod erfolgreich ausgeführt hat.
+License and support
+Official releases are free for personal, non-commercial use. Modification,
+redistribution, rehosting and commercial use require Poffl's written permission.
+The source code is not open source. See LICENSE for full terms.
+Report issues: https://github.com/Poffl-Mods/Mac-Modinstaller/issues
+No third-party mods, game files, Unity SDK files or loader binaries are included.
+This is an independent project, not an official Owlcat, Games Workshop, Unity
+or Apple product. Third-party licenses are provided with the download.
 
-Unterstützte Formate
-- Info.json plus Mod-DLL: UnityModManager/<Id>, Aktivierung in Params.xml.
-- OwlcatModificationManifest.json: Modifications/<UniqueName>, Aktivierung in
-  OwlcatModificationManagerSettings.json.
-- Bei beiden Manifesten hat Info.json Vorrang (z.B. ToyBox und ReDress).
-- ZIPs mit oder ohne umschließenden Mod-Ordner. Ein Mod pro ZIP.
-- Aktivieren/deaktivieren, Updates, Suchfilter, Ordner im Finder öffnen.
+Deutsch — Kurzstart
+-------------------
+Voraussetzungen: Apple Silicon (M1 oder neuer), macOS 13 oder neuer, Rogue Trader.
+ZIP entpacken, Mac-ModInstaller.app nach Programme verschieben und öffnen.
+Die App ist lokal signiert, aber nicht von Apple notarisiert. Bei einer Sperre
+kann die einzelne App nach Prüfung der Downloadquelle unter Systemeinstellungen
+> Datenschutz & Sicherheit > Dennoch öffnen freigegeben werden. Anleitung:
+https://support.apple.com/de-de/102445
 
-Sicherungen
-Vor Änderungen werden Konfiguration und bei Updates der alte Mod-Ordner unter
-„RogueModInstaller Backups“ im Spiel-Benutzerdatenordner gesichert.
-Restore.json beschreibt die Zielpfade. Zum manuellen Wiederherstellen zuerst
-Spiel und Installer schließen. Gesicherte Konfiguration an ihren ursprünglichen
-Ort kopieren; bei einem Mod-Update den aktuellen Mod-Ordner zur Seite verschieben
-und PreviousMod an den in Restore.json genannten modFolder-Pfad kopieren.
-Die Sicherungen enthalten auch später hinzugefügte User-Dateien. Nach einer
-Wiederherstellung die anderen seitdem installierten Mods prüfen, da die
-Konfiguration den Stand der betreffenden Sicherung enthält.
-Sicherungen werden nicht automatisch gelöscht.
-Bei Fehlern während des Kopierens/Schreibens wird der Mod-Ordner zurückgesetzt.
-Bei Prozessabbruch oder Stromausfall bleibt die Sicherung für manuelle Reparatur.
+Spiel schließen. Der Benutzerdatenordner wird automatisch gesucht; bei Bedarf
+manuell auswählen. Eine Mod-ZIP hineinziehen oder über den Dateidialog öffnen,
+Vorschau und Hinweise prüfen, installieren und das Spiel neu starten.
+Die angezeigte Aktivierung bestätigt nicht, dass die Mod im Spiel funktioniert.
+Nicht prüfbare Bundles bleiben ausdrücklich ungeprüft; es erfolgt keine
+Umwandlung in Mac-Bundles. Sicherungen enthalten keine Spielstände.
+Kostenlos zur privaten, nichtkommerziellen Nutzung. Änderungen, Weitergabe und
+kommerzielle Nutzung benötigen Poffls schriftliche Erlaubnis. Details: LICENSE.
 
-Updates
-Vom Installer erfasste Paketdateien werden bei Updates ersetzt bzw. entfernt,
-wenn die neue Version sie nicht mehr enthält. Zusätzliche lokale Dateien bleiben
-erhalten, solange das neue Paket sie nicht selbst mitliefert. Bei erstmals
-übernommenen fremden Installationen ist die Herkunft vorhandener Dateien nicht
-bekannt; solche Dateien werden konservativ erhalten.
-
-Grenzen dieser ersten Version
-- Kein Download-Katalog, keine automatische Abhängigkeitsauflösung und kein
-  Loadorder-Editor. Bestehende Reihenfolge wird beim erneuten Aktivieren eines
-  bereits aktivierten Owlcat-Mods beibehalten. UMM verwaltet seine Reihenfolge.
-- Keine Änderungen an Harmony, Spiel-DLLs, Rosetta oder dem Mod-Loader selbst.
-- Keine Garantie der Mac-Kompatibilität eines ZIPs. AssetBundles werden erkannt
-  und in der Vorschau angesprochen, jedoch nicht in Mac-Bundles umgewandelt.
-- Nur lokale Installation, keine Steam-Workshop-Verwaltung.
-- Keine Deinstallation in dieser ersten Version; Deaktivieren ist möglich.
-- Maximal 4 GB entpackt / 100.000 ZIP-Einträge; Verknüpfungen, unsichere Pfade,
-  mehrdeutige Pakete und fehlerhafte Konfigurationen werden abgelehnt.
-- Lokal ad-hoc signiert, nicht für öffentliche Verteilung notarisiert.
-
-Entwicklung
-Swift / SwiftUI, macOS 13+, ZIPFoundation 0.9.20 (MIT).
-Package.swift in Xcode öffnen oder im Projektordner ausführen:
-  swift test
-  ./build-app.sh
-Build und Tests benötigen Xcode bzw. die passenden Swift-Werkzeuge.
-Die fertige App benötigt weder Xcode noch Python, Unity oder Rosetta.
-ZIPFoundation-Lizenz wird mit der App ausgeliefert.
-
-Validierung am 08.10.2026
-11 Tests erfolgreich: Owlcat/UMM-Routing, UTF-8 BOM, JSON-/XML-Erhalt,
-Aktivierung, Updates, Sicherung, Rollback bei simuliertem Schreibfehler,
-Entfernung veralteter Paketdateien, Pfad-/Symlink-Abwehr, DTD-Abwehr.
-Echte ToyBox-1.7.34-, ReDress-1.4.5- und ArmouryOrks-0.4.9-Pakete in
-isolierten Ordnern installiert. Keine zusätzliche Installation ins echte Spiel.
-GUI: automatische Erkennung des echten Spielordners, ArmouryOrks-Status,
-Dateiauswahl und ToyBox-Vorschau mit korrektem UMM-Ziel geprüft.
-Finder-Drag-and-drop ist implementiert; ein echter Finder-Drag wurde nicht separat automatisiert geprüft.
-Kein Spieltest als Teil dieser App-Entwicklung.
-
-Version 0.2.0: App in Mac-ModInstaller umbenannt. Sprachauswahl oben rechts:
-English, Deutsch, Français, Español, Русский, 简体中文 (vereinfachtes Chinesisch).
-Die Auswahl wird gespeichert und sofort auf die app-eigenen Texte angewendet.
-Native macOS-Menüs und Teile des Dateidialogs folgen der Systemsprache.
-Die Bundle-ID und bisherigen Sicherungspfade bleiben für bestehende Einstellungen stabil.
-85 Meldungen in sechs Sprachen, 14 Tests erfolgreich.
-
-Cogitator interface (10.10.2026)
-------------------------------
-Adeptus Mechanicus-inspired native SwiftUI appearance: dark metal, brass frames,
-Mechanicus red, phosphor green, static scanlines and an original cog/skull glyph.
-Main window, package preview and app icon share the theme. All six UI languages
-include the new ritual headings; operational labels remain explicit.
-Reference research: the Machine Cult / Omnissiah overview on Warhammer Community
-https://www.warhammer-community.com/de-de/topics/adeptus-mechanicus/
-and Rogue Trader's cogitator/data altar imagery. No external artwork is bundled.
-Validation: 14 tests passed; main window and ToyBox update preview inspected.
-No installation into the game was performed during this design verification.
-The build script accepts optional Swift build arguments for restricted environments.
-
-Local preflight checks (10.10.2026)
----------------------------------
-The package preview and installed list now report missing, disabled or outdated
-dependencies, unknown version metadata, and local version downgrades. UMM
-requirements accept Id-Version syntax; Owlcat Dependencies accept string lists.
-Unreadable declarations are visible warnings. No dependency downloads are made.
-MicroPatches is an advisory for Owlcat blueprint/bundle content when an active
-UMM MicroPatches installation is absent; it is not universally required or
-automatically installed. Users must check the individual mod's requirements.
-Manifest filenames are recognized regardless of capitalization; ambiguous names
-are rejected and UMM retains priority in dual-manifest packages.
-Binary headers distinguish native Windows PE, managed IL-only PE and Linux ELF.
-Truncated/unsupported PE headers produce an unknown-format warning. This does not
-verify managed code's P/Invoke dependencies, Harmony patches or game compatibility.
-AssetBundle detection uses file signatures and content in Bundles, including
-lowercase directories; empty directories do not trigger a bundle warning.
-Windows-specific paths are flagged. The serialized bundle target is not decoded;
-other bundles remain explicitly unverified, including purported macOS builds.
-Preview warnings require acknowledgement. New warnings discovered by a fresh
-installed-mod scan abort before creating backups or changing files. Activation
-changes warn when enabling a mod with issues or disabling a needed dependency.
-Validation: 23 tests passed, including nine new preflight regression tests.
-
-Automatische Bestandsaktualisierung
-----------------------------------
-Das geöffnete Fenster prüft alle zwei Sekunden die Mod-Verzeichnisse,
-Manifeste und Owlcat-/UMM-Aktivierungskonfigurationen des gewählten
-Spielordners. Externe Installationen, Updates, Löschungen und Aktivierungen
-erscheinen nach zwei stabilen Prüfungen (normalerweise innerhalb von vier
-Sekunden). Die Paketdateien werden nur bei verändertem Bestand geprüft.
-Während eigener Vorgänge, Installationsvorschauen, Bestätigungen und
-Fehler-/Dateidialogen bleibt die Liste unverändert. Nach deren Abschluss
-wird die Prüfung automatisch fortgesetzt. Unvollständige externe Schreib-
-vorgänge werden still erneut geprüft; sie ersetzen die letzte lesbare Liste
-nicht und öffnen keine zusätzlichen Dialoge.
+Development
+-----------
+Swift / SwiftUI; ZIPFoundation 0.9.20 (MIT). After obtaining permission to build
+or modify the source: swift test, then ./build-app.sh.
+The script accepts additional Swift build options. Release output:
+dist/Mac-ModInstaller.app. Create the distributable ZIP and SHA-256 checksum with ./package-release.sh.
+38 automated tests passed for version 1.0.0. Historical validation notes:
+DEVELOPMENT-NOTES.txt.

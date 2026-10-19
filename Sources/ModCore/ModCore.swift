@@ -21,6 +21,7 @@ public struct Mod: Identifiable, Sendable {
     public let requirements: [String]
     public var packageWarnings: [ModWarning] = []
     public var hasOwlcatContent = false
+    public var bundlePlatforms: [BundlePlatform] = []
 }
 public final class PreparedMod: Sendable {
     public let mod: Mod
@@ -87,6 +88,7 @@ public enum ModIO {
                    requirements: metadata[kind == .umm ? "Requirements" : "Dependencies"] as? [String] ?? [])
         let checks = try ModChecks.inspect(folder)
         mod.packageWarnings = checks.warnings; mod.hasOwlcatContent = checks.content
+        mod.bundlePlatforms = checks.platforms
         if let raw = metadata[kind == .umm ? "Requirements" : "Dependencies"], !(raw is [String]) {
             mod.packageWarnings.append(ModWarning("requirements-metadata", "Abhängigkeiten im Manifest sind nicht lesbar."))
         }
@@ -151,7 +153,7 @@ public enum ModIO {
                     throw ModError("Zusätzliche Dateien außerhalb des Mod-Ordners. Bitte ein einzelnes Mod-Paket verwenden.")
                 }
             }
-            let bundles = mod.packageWarnings.contains { $0.code == "bundles" }
+            let bundles = !mod.bundlePlatforms.isEmpty
             return PreparedMod(mod: mod, hasBundles: bundles, size: total, temp: temp)
         } catch { try? fm.removeItem(at: temp); throw error }
     }

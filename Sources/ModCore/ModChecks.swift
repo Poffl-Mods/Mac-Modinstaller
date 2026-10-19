@@ -119,8 +119,9 @@ public enum ModChecks {
         return result.filter { seen.insert($0.id).inserted }
     }
 
-    static func inspect(_ folder: URL) throws -> (warnings: [ModWarning], bundles: Bool, content: Bool) {
+    static func inspect(_ folder: URL) throws -> (warnings: [ModWarning], bundles: Bool, content: Bool, platforms: [BundlePlatform]) {
         var warnings: [ModWarning] = []; var bundles = false; var content = false
+        var platforms: [BundlePlatform] = []
         for case let file as URL in FileManager.default.enumerator(at: folder, includingPropertiesForKeys: [.isRegularFileKey, .isSymbolicLinkKey])! {
             let info = try file.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
             guard info.isSymbolicLink != true, info.isRegularFile == true else { continue }
@@ -141,6 +142,15 @@ public enum ModChecks {
             let bundleFile = components.first == "bundles" && !["manifest", "txt", "json", "meta"].contains(file.pathExtension.lowercased())
             if unity || bundleFile {
                 bundles = true
+                let platform = AssetBundleReader.inspect(file, path: relative)
+                platforms.append(platform)
+                let incompatible = platform.targets.filter { [5, 19, 17, 24, 25, 9, 13, 20, 31, 33, 37, 38].contains($0) }
+                if !incompatible.isEmpty {
+                    warnings.append(ModWarning("bundle-platform", "AssetBundle {0}: gebaut für {1}. Für dieses Bundle wird eine macOS-Ausgabe benötigt.", relative, incompatible.map(BundlePlatform.name).joined(separator: ", ")))
+                }
+                if (!platform.isMac && incompatible.isEmpty) || !platform.complete {
+                    warnings.append(ModWarning("bundles", "AssetBundle {0}: Zielplattform nicht sicher prüfbar. Verwende eine bestätigte macOS-Ausgabe.", relative))
+                }
                 if components.contains(where: { ["windows", "win64", "win32", "standalonewindows", "standalonewindows64"].contains(String($0)) }) {
                     warnings.append(ModWarning("windows-bundle", "AssetBundle im Windows-Pfad: {0}. Verwende eine macOS-Ausgabe.", relative))
                 }
@@ -156,8 +166,7 @@ public enum ModChecks {
                 }
             }
         }
-        if bundles { warnings.append(ModWarning("bundles", "AssetBundles erkannt. Zielplattform nicht verifiziert; verwende eine für macOS gebaute Ausgabe.")) }
-        return (warnings, bundles, content)
+        return (warnings, bundles, content, platforms.sorted { $0.path < $1.path })
     }
 
     enum PEKind { case native, managed, unknown }

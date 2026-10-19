@@ -10,7 +10,8 @@ The build script includes its license in the local application bundle.
 Apple SDKs and SF Symbols
 The application uses SwiftUI, AppKit, Foundation and Apple system symbols.
 These Apple-provided materials are governed by their applicable Apple terms.
-The app icon is generated with AppKit and the shippingbox.fill system symbol.
+The app icon is original AppKit-drawn cog/skull artwork. The interface also
+uses Apple system symbols.
 
 Warhammer 40,000: Rogue Trader and Unity Mod Manager
 Mac-ModInstaller interoperates with their existing mod folders and settings.

@@ -112,7 +112,10 @@
     "AssetBundles erkannt. Zielplattform nicht verifiziert; verwende eine für macOS gebaute Ausgabe.": "AssetBundles erkannt. Zielplattform nicht verifiziert; verwende eine für macOS gebaute Ausgabe.",
     "Mehrdeutiger Manifest-Dateiname: {0}": "Mehrdeutiger Manifest-Dateiname: {0}",
     "Abhängigkeiten im Manifest sind nicht lesbar.": "Abhängigkeiten im Manifest sind nicht lesbar.",
-    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen."
+    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.",
+    "AssetBundle {0}: gebaut für {1}. Für dieses Bundle wird eine macOS-Ausgabe benötigt.": "AssetBundle {0}: gebaut für {1}. Für dieses Bundle wird eine macOS-Ausgabe benötigt.",
+    "AssetBundle {0}: Zielplattform nicht sicher prüfbar. Verwende eine bestätigte macOS-Ausgabe.": "AssetBundle {0}: Zielplattform nicht sicher prüfbar. Verwende eine bestätigte macOS-Ausgabe.",
+    "Bundle-Zielplattform: {0} · {1}. Keine Garantie der Spielkompatibilität.": "Bundle-Zielplattform: {0} · {1}. Keine Garantie der Spielkompatibilität."
   },
   "en": {
     "Sprache": "Language",
@@ -227,7 +230,10 @@
     "AssetBundles erkannt. Zielplattform nicht verifiziert; verwende eine für macOS gebaute Ausgabe.": "AssetBundles detected. Target platform not verified; use a build made for macOS.",
     "Mehrdeutiger Manifest-Dateiname: {0}": "Ambiguous manifest filename: {0}",
     "Abhängigkeiten im Manifest sind nicht lesbar.": "Cannot parse dependencies in the manifest.",
-    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Check results have changed. Reopen the ZIP and review the warnings."
+    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Check results have changed. Reopen the ZIP and review the warnings.",
+    "AssetBundle {0}: gebaut für {1}. Für dieses Bundle wird eine macOS-Ausgabe benötigt.": "AssetBundle {0}: built for {1}. A macOS build is required for this bundle.",
+    "AssetBundle {0}: Zielplattform nicht sicher prüfbar. Verwende eine bestätigte macOS-Ausgabe.": "AssetBundle {0}: target platform cannot be verified. Use a confirmed macOS build.",
+    "Bundle-Zielplattform: {0} · {1}. Keine Garantie der Spielkompatibilität.": "Bundle target platform: {0} · {1}. Does not guarantee game compatibility."
   },
   "fr": {
     "Sprache": "Langue",
@@ -342,7 +348,10 @@
     "AssetBundles erkannt. Zielplattform nicht verifiziert; verwende eine für macOS gebaute Ausgabe.": "AssetBundles détectés. Plateforme cible non vérifiée ; utilisez une version compilée pour macOS.",
     "Mehrdeutiger Manifest-Dateiname: {0}": "Nom de manifeste ambigu : {0}",
     "Abhängigkeiten im Manifest sind nicht lesbar.": "Les dépendances du manifeste sont illisibles.",
-    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Les résultats ont changé. Rouvrez le ZIP et vérifiez les avertissements."
+    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Les résultats ont changé. Rouvrez le ZIP et vérifiez les avertissements.",
+    "AssetBundle {0}: gebaut für {1}. Für dieses Bundle wird eine macOS-Ausgabe benötigt.": "AssetBundle {0} : compilé pour {1}. Une version macOS est nécessaire pour ce bundle.",
+    "AssetBundle {0}: Zielplattform nicht sicher prüfbar. Verwende eine bestätigte macOS-Ausgabe.": "AssetBundle {0} : plateforme cible non vérifiable. Utilisez une version macOS confirmée.",
+    "Bundle-Zielplattform: {0} · {1}. Keine Garantie der Spielkompatibilität.": "Plateforme cible du bundle : {0} · {1}. Ne garantit pas la compatibilité avec le jeu."
   },
   "es": {
     "Sprache": "Idioma",
@@ -457,7 +466,10 @@
     "AssetBundles erkannt. Zielplattform nicht verifiziert; verwende eine für macOS gebaute Ausgabe.": "AssetBundles detectados. Plataforma de destino no verificada; usa una versión compilada para macOS.",
     "Mehrdeutiger Manifest-Dateiname: {0}": "Nombre de manifiesto ambiguo: {0}",
     "Abhängigkeiten im Manifest sind nicht lesbar.": "No se pueden interpretar las dependencias del manifiesto.",
-    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Los resultados han cambiado. Abre de nuevo el ZIP y revisa las advertencias."
+    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Los resultados han cambiado. Abre de nuevo el ZIP y revisa las advertencias.",
+    "AssetBundle {0}: gebaut für {1}. Für dieses Bundle wird eine macOS-Ausgabe benötigt.": "AssetBundle {0}: compilado para {1}. Este bundle necesita una versión para macOS.",
+    "AssetBundle {0}: Zielplattform nicht sicher prüfbar. Verwende eine bestätigte macOS-Ausgabe.": "AssetBundle {0}: no se puede verificar la plataforma de destino. Usa una versión confirmada para macOS.",
+    "Bundle-Zielplattform: {0} · {1}. Keine Garantie der Spielkompatibilität.": "Plataforma de destino del bundle: {0} · {1}. No garantiza la compatibilidad con el juego."
   },
   "ru": {
     "Sprache": "Язык",
@@ -572,7 +584,10 @@
     "AssetBundles erkannt. Zielplattform nicht verifiziert; verwende eine für macOS gebaute Ausgabe.": "Обнаружены AssetBundles. Целевая платформа не проверена; используйте сборку для macOS.",
     "Mehrdeutiger Manifest-Dateiname: {0}": "Неоднозначное имя файла манифеста: {0}",
     "Abhängigkeiten im Manifest sind nicht lesbar.": "Не удалось прочитать зависимости в манифесте.",
-    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Результаты проверки изменились. Откройте ZIP заново и проверьте предупреждения."
+    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "Результаты проверки изменились. Откройте ZIP заново и проверьте предупреждения.",
+    "AssetBundle {0}: gebaut für {1}. Für dieses Bundle wird eine macOS-Ausgabe benötigt.": "AssetBundle {0}: собран для {1}. Для этого набора нужна сборка для macOS.",
+    "AssetBundle {0}: Zielplattform nicht sicher prüfbar. Verwende eine bestätigte macOS-Ausgabe.": "AssetBundle {0}: целевую платформу проверить не удалось. Используйте подтверждённую сборку для macOS.",
+    "Bundle-Zielplattform: {0} · {1}. Keine Garantie der Spielkompatibilität.": "Целевая платформа набора: {0} · {1}. Совместимость с игрой не гарантируется."
   },
   "zh-Hans": {
     "Sprache": "语言",
@@ -687,6 +702,9 @@
     "AssetBundles erkannt. Zielplattform nicht verifiziert; verwende eine für macOS gebaute Ausgabe.": "检测到 AssetBundles。目标平台未验证；请使用为 macOS 构建的版本。",
     "Mehrdeutiger Manifest-Dateiname: {0}": "清单文件名存在歧义：{0}",
     "Abhängigkeiten im Manifest sind nicht lesbar.": "无法解析清单中的依赖项。",
-    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "检查结果已改变。请重新打开 ZIP 并阅读警告。"
+    "Prüfergebnisse haben sich geändert. ZIP erneut öffnen und Hinweise prüfen.": "检查结果已改变。请重新打开 ZIP 并阅读警告。",
+    "AssetBundle {0}: gebaut für {1}. Für dieses Bundle wird eine macOS-Ausgabe benötigt.": "AssetBundle {0}：为 {1} 构建。此资源包需要 macOS 版本。",
+    "AssetBundle {0}: Zielplattform nicht sicher prüfbar. Verwende eine bestätigte macOS-Ausgabe.": "AssetBundle {0}：无法验证目标平台。请使用已确认的 macOS 版本。",
+    "Bundle-Zielplattform: {0} · {1}. Keine Garantie der Spielkompatibilität.": "资源包目标平台：{0} · {1}。不保证游戏兼容性。"
   }
 }
