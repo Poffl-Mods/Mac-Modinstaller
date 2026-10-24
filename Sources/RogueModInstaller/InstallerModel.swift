@@ -16,6 +16,10 @@ import ModCore
     func cancelPreview() { preview = nil; if !busy { status = Message("ZIP hinzufügen, prüfen, installieren.") } }
     @Published var error: String? { didSet { invalidateInventory() } }
     @Published var preview: PreparedMod? { didSet { invalidateInventory() } }
+    @Published var harmonyInspection: HarmonyInspection? { didSet { invalidateInventory() } }
+    @Published var harmonyBackup: URL? = UserDefaults.standard.string(forKey: "harmonyBackup").map { URL(fileURLWithPath: $0) }
+    @Published var pendingUninstall: Mod? { didSet { invalidateInventory() } }
+    @Published var removeUninstallBackups = false
     @Published var filter = ""
     @Published var pendingToggle: Mod? { didSet { invalidateInventory() } }
     @Published var toggleWarnings: [ModWarning] = []
@@ -30,7 +34,7 @@ import ModCore
     private var appliedStamp: InventoryStamp?
     private var observedStamp: InventoryStamp?
     private var inventoryBlocked: Bool {
-        busy || preview != nil || pendingToggle != nil || error != nil || NSApplication.shared.modalWindow != nil
+        busy || preview != nil || harmonyInspection != nil || pendingToggle != nil || pendingUninstall != nil || error != nil || NSApplication.shared.modalWindow != nil
     }
     private func invalidateInventory() {
         inventoryGeneration += 1
@@ -100,7 +104,7 @@ import ModCore
         if panel.runModal() == .OK, let url = panel.url { prepare(url) }
     }
     func prepare(_ url: URL) {
-        guard !busy, preview == nil else { return }
+        guard !busy, preview == nil, harmonyInspection == nil else { return }
         busy = true; status = Message("ZIP wird geprüft …")
         work.async {
             let result = Result { try ModIO.prepare(url) }
@@ -149,6 +153,33 @@ import ModCore
         work.async {
             let result = Result { try ModIO.setEnabled(mod, root: root, enabled: !mod.enabled) }
             DispatchQueue.main.async { self.complete(result, success: Message(mod.enabled ? "{0} deaktiviert. Spiel neu starten." : "{0} aktiviert. Spiel neu starten.", mod.name)) }
+        }
+    }
+    func requestUninstall(_ mod: Mod) {
+        guard !busy, preview == nil, harmonyInspection == nil else { return }
+        removeUninstallBackups = false
+        pendingUninstall = mod
+    }
+    func uninstall() {
+        guard let mod = pendingUninstall, let root, !busy else { return }
+        pendingUninstall = nil
+        guard ensureGameClosed() else { return }
+        let removeBackups = removeUninstallBackups
+        busy = true; status = Message("{0} wird deinstalliert …", mod.name)
+        work.async {
+            let result = Result { try ModIO.uninstall(mod, root: root, removeBackups: removeBackups) }
+            DispatchQueue.main.async {
+                self.busy = false
+                switch result {
+                case .success(let backup):
+                    self.lastBackup = backup
+                    self.status = Message("{0} deinstalliert.", mod.name)
+                case .failure(let failure):
+                    self.error = Localization.error(failure, language: self.language)
+                    self.status = Message("Änderung nicht abgeschlossen.")
+                }
+                self.refresh()
+            }
         }
     }
     func complete(_ result: Result<URL, Error>, success: Message) {

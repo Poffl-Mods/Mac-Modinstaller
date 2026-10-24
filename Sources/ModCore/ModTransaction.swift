@@ -20,7 +20,7 @@ extension ModIO {
 
     static func transaction(
         root: URL, target: URL?, config: URL, data: Data, payload: URL?,
-        beforeCommit: (() throws -> Void)? = nil
+        removeTarget: Bool = false, beforeCommit: (() throws -> Void)? = nil
     ) throws -> URL {
         try safe(config, in: root)
         if let target { try safe(target, in: root) }
@@ -98,6 +98,10 @@ extension ModIO {
                     to: stage.appendingPathComponent(receiptName), options: .atomic)
                 try fm.moveItem(at: stage, to: target)
                 installedNew = true
+            }
+            if removeTarget, let target {
+                try fm.moveItem(at: target, to: previous)
+                movedOld = true
             }
             try fm.createDirectory(at: config.deletingLastPathComponent(), withIntermediateDirectories: true)
             // Don't overwrite changes made by another program during staging.

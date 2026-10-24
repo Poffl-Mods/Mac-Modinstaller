@@ -40,6 +40,6 @@ extension ModIO {
     public static func setEnabled(_ mod: Mod, root: URL, enabled: Bool) throws -> URL {
         let data = try configData(root: root, kind: mod.kind, key: mod.key, enabled: enabled)
         return try transaction(
-            root: root, target: nil, config: configURL(mod.kind, root: root), data: data, payload: nil)
+            root: root, target: mod.folder, config: configURL(mod.kind, root: root), data: data, payload: nil)
     }
 }

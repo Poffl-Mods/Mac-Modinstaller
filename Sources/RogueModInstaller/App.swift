@@ -47,6 +47,12 @@ struct MainView: View {
             .sheet(isPresented: Binding(get: { model.preview != nil }, set: { if !$0 { model.cancelPreview() } })) {
                 if let package = model.preview { PreviewView(model: model, package: package) }
             }
+            .sheet(isPresented: Binding(get: { model.harmonyInspection != nil }, set: { if !$0 && !model.busy { model.harmonyInspection = nil } })) {
+                if let inspection = model.harmonyInspection { HarmonyView(model: model, inspection: inspection) }
+            }
+            .sheet(isPresented: Binding(get: { model.pendingUninstall != nil }, set: { if !$0 { model.pendingUninstall = nil } })) {
+                if let mod = model.pendingUninstall { UninstallView(model: model, mod: mod) }
+            }
             .confirmationDialog(model.t("Prüfhinweise"), isPresented: Binding(get: { model.pendingToggle != nil }, set: { if !$0 { model.pendingToggle = nil } }), titleVisibility: .visible) {
                 Button(model.t("Trotzdem fortfahren")) {
                     if let mod = model.pendingToggle { model.pendingToggle = nil; model.applyToggle(mod) }
@@ -87,6 +93,8 @@ struct MainView: View {
                     .lineLimit(1).truncationMode(.middle).help(model.root?.path ?? "")
             }
             Spacer()
+            Button(model.t("Harmony für Mac …"), action: model.chooseHarmony)
+                .disabled(model.root == nil || model.busy || model.preview != nil || model.harmonyInspection != nil)
             Button(model.t("Ändern …")) { model.chooseRoot() }.disabled(model.busy || model.preview != nil)
         }.padding(16).forgePanel()
     }
@@ -170,6 +178,8 @@ struct MainView: View {
             Spacer()
             Button { NSWorkspace.shared.open(mod.folder) } label: { Image(systemName: "folder") }
                 .accessibilityLabel(model.t("Mod-Ordner öffnen")).help(model.t("Mod-Ordner öffnen"))
+            Button(model.t("Deinstallieren …"), role: .destructive) { model.requestUninstall(mod) }
+                .disabled(model.busy || model.preview != nil || model.harmonyInspection != nil)
             Toggle(mod.enabled ? model.t("Aktiv") : model.t("Inaktiv"), isOn: Binding(get: { mod.enabled }, set: { _ in model.toggle(mod) }))
                 .font(.system(size: 11, design: .monospaced)).foregroundStyle(mod.enabled ? Forge.phosphor : Forge.muted)
                 .toggleStyle(.switch).controlSize(.small).frame(minWidth: 120).disabled(model.busy || model.preview != nil)
@@ -277,5 +287,33 @@ struct BundlePlatformList: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+}
+
+struct UninstallView: View {
+    @ObservedObject var model: InstallerModel
+    let mod: Mod
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text(model.t("{0} deinstallieren?", mod.name)).font(.title2)
+            Text(model.t("Der gesamte Mod-Ordner mit allen enthaltenen Einstellungen und der Loader-Eintrag werden entfernt. Extern gespeicherte Einstellungen und Spielstände bleiben erhalten."))
+            Text(mod.folder.path).font(.caption).textSelection(.enabled)
+            let dependents = model.mods.filter { $0.id != mod.id && $0.enabled }.filter { candidate in
+                let before = Set(model.warnings(candidate).map(\.id))
+                return ModChecks.warnings(for: candidate, installed: model.mods.filter { $0.id != mod.id }).contains { !before.contains($0.id) }
+            }
+            if !dependents.isEmpty {
+                Text(model.t("Aktive Mods benötigen diesen Mod: {0}", dependents.map(\.name).joined(separator: ", "))).foregroundStyle(Forge.brass)
+            }
+            Toggle(model.t("Zugehörige Installer-Sicherungen ebenfalls endgültig löschen"), isOn: $model.removeUninstallBackups)
+            Text(model.t("Ohne diese Option wird eine Sicherung zur Wiederherstellung behalten. Ältere Sicherungen ohne Mod-Zuordnung bleiben erhalten."))
+                .font(.caption).foregroundStyle(Forge.muted)
+            HStack {
+                Spacer()
+                Button(model.t("Abbrechen"), role: .cancel) { model.pendingUninstall = nil }.keyboardShortcut(.cancelAction)
+                Button(model.t("Deinstallieren"), role: .destructive) { model.uninstall() }
+            }
+        }.padding(28).frame(width: 560).background(CogitatorBackdrop())
+            .foregroundStyle(Forge.parchment).buttonStyle(ForgeButtonStyle()).preferredColorScheme(.dark)
     }
 }

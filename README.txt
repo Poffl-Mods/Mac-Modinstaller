@@ -47,7 +47,26 @@ SerializedFile 9-22. LZMA, legacy UnityRaw/UnityWeb, unknown/encrypted formats,
 invalid data and files exceeding inspection limits remain explicitly unverified.
 A macOS target does not guarantee working shaders, Harmony patches, native
 libraries, game-version compatibility or successful loading in the game.
-The installer does not convert bundles or modify Harmony/the mod loader.
+The installer does not convert bundles or replace the mod loader.
+
+Harmony for Mac
+Use "Harmony for Mac" to select the Rogue Trader game .app and inspect its
+shared Harmony DLL. This is separate from installing individual mods. The
+optional action downloads the pinned official Harmony Fat 2.4.2.0 release from
+GitHub and installs its net472/0Harmony.dll after verifying both SHA-256 hashes.
+It requires an explicit acknowledgement and a closed game. An identical build
+is left alone; a newer readable file version is not downgraded. Unknown file
+versions are displayed as unknown rather than assumed to be older.
+
+The original DLL and HarmonyRestore.json are saved under "RogueModInstaller
+Backups/Harmony-..." in the selected user-data folder. "Restore Harmony" restores
+the saved DLL only if the backup matches the selected game and the currently
+installed DLL still matches the updater's version. Choose the backup folder
+manually if needed. Steam/game updates or file verification may revert changes.
+Changing a file inside the game app may invalidate its signature; this operation
+does not re-sign the game. This cannot fix all mod compatibility problems.
+No Harmony binaries are bundled or redistributed. Official source/download:
+https://github.com/pardeike/Harmony/releases/tag/v2.4.2.0
 
 Backups
 Before changes, configuration files are backed up under "RogueModInstaller
@@ -62,9 +81,20 @@ configuration reflects the older state. Save games are not included in backups.
 An ordinary installation error triggers rollback; an interruption or power loss
 can require manual recovery from the retained backup.
 
+Uninstalling
+Use "Uninstall …" next to a mod and confirm removal. This removes the entire mod
+folder, including settings inside it, and the mod's loader configuration entry.
+External settings and saved games are retained. Enabled dependent mods are shown
+before confirmation. Close the game first.
+By default a recovery backup is retained. Select the backup deletion option to
+also permanently remove backups whose Restore.json names this mod's folder,
+including the new recovery backup. Old activation-only backups without a mod
+association and backups of other mods are retained. Shared configuration snapshots
+in those backups may still contain historical entries for the removed mod.
+
 Scope
 One mod per ZIP. No download catalog, dependency downloads, automatic updates,
-load-order editor, uninstall button or Steam Workshop management. Dependencies
+load-order editor or Steam Workshop management. Dependencies
 must be installed separately. Maximum 4 GB extracted / 100,000 ZIP entries;
 unsafe paths, symbolic links and ambiguous packages are rejected.
 

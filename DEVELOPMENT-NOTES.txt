@@ -236,3 +236,49 @@ UI and installed-mod platform display worked; About showed 1.0.0 (100).
 No mod install/update or activation change was performed during this live check.
 The release remains ad-hoc signed, not Developer ID signed or Apple notarized.
 First-launch guidance links to Apple's application-specific exception workflow.
+
+Harmony maintenance (local development, 19.10.2026)
+--------------------------------------------------
+Separate optional Harmony action; never rewrites DLLs inside individual mods.
+Pinned official Fat 2.4.2.0 archive, net472 DLL; SHA-256 verified against the
+upstream release asset digest and extracted DLL. No third-party binary bundled.
+Reads PE file-version metadata without loading code; unknown versions remain
+unknown, detected newer versions are not downgraded. Shared game DLL changes
+require explicit UI acknowledgement and a closed game. Backup and guarded
+restore live under the existing user-data backup directory. No re-signing.
+
+Validation: 46 offline tests passed; the optional network test was run separately
+and passed against the official GitHub release (47 unique tests exercised).
+Coverage includes official archive extraction/install/restore in disposable
+fixtures, PE version parsing, invalid/symlink targets, corrupt/untrusted packages,
+backup tampering, conflicting changes, downgrade refusal, simulated failed
+commit and inventory pause while the maintenance sheet is open.
+Release build and local signature verification passed. Live UI: selected the
+real game app for read-only inspection, displayed file version 2.4.2.0 and the
+confirmation/safety text; cancelled without installation. No productive game
+files, mod payloads, activation settings or runtime editor packages modified.
+Runtime gameplay compatibility has not been tested as part of this feature.
+Not published to GitHub and not included in release 1.0.1.
+
+
+Public release 1.1.0 (24.10.2026)
+-------------------------------
+User authorized removal of the old local installer and commit, push and release.
+Added per-mod uninstall confirmation with dependency warnings, removal of the
+whole mod directory and loader entry, optional associated backup cleanup, and
+six-language UI strings. Settings outside the mod directory and saves remain.
+Activation backups now record the mod folder for future selective cleanup.
+Removal uses the backup transaction and restores the mod if commit fails.
+The existing local Harmony maintenance work is included in this release.
+Version 1.1.0, build 110.
+
+Validation: 49 offline tests passed; the optional official Harmony network test
+passed separately (50 passing unique tests). The optional local Unity bundle
+fixture currently targets Windows (19), not the macOS (2) expected by its test;
+that unrelated fixture test failed in the full run and is excluded from the
+release run. No fixture or assertion was changed to mask this discrepancy.
+Release app and ZIP verified: version/build, arm64, local ad-hoc code signature,
+ZIP integrity, extracted app signature and matching executable SHA-256.
+User reports successful live testing of the uninstall feature.
+Old Rogue Mods 0.1.0 app moved from previous-builds into the user's Trash;
+empty temporary test app remnants were removed. Current dist app retained.

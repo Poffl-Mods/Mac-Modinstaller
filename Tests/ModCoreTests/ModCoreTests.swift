@@ -34,6 +34,64 @@ final class ModCoreTests: XCTestCase {
     func owl(_ id: String = "Test", version: String = "1") -> String {
         "{\"UniqueName\":\"\(id)\",\"DisplayName\":\"Test Mod\",\"Version\":\"\(version)\"}"
     }
+    func testUninstallTransactionRestoresModWhenCommitFails() throws {
+        let root = try game()
+        let p = try ModIO.prepare(zip(["OwlcatModificationManifest.json": owl(), "Settings.json": "settings"]))
+        _ = try ModIO.install(p, root: root)
+        let mod = try XCTUnwrap(ModIO.installed(root: root).first)
+        let config = ModIO.configURL(.owlcat, root: root)
+        let original = try Data(contentsOf: config)
+        XCTAssertThrowsError(try ModIO.transaction(root: root, target: mod.folder, config: config,
+            data: Data("{}".utf8), payload: nil, removeTarget: true, beforeCommit: { throw ModError("fixture failure") }))
+        XCTAssertEqual(try Data(contentsOf: config), original)
+        XCTAssertEqual(try String(contentsOf: mod.folder.appendingPathComponent("Settings.json")), "settings")
+        XCTAssertEqual(try ModIO.installed(root: root).first?.id, mod.id)
+    }
+    func testUninstallRemovesSettingsAndConfigurationAndRetainsRecovery() throws {
+        let root = try game()
+        let p = try ModIO.prepare(zip(["OwlcatModificationManifest.json": owl(), "Settings.json": "{\"custom\":true}"]))
+        let installBackup = try ModIO.install(p, root: root)
+        let mod = try XCTUnwrap(ModIO.installed(root: root).first)
+        let backup = try XCTUnwrap(ModIO.uninstall(mod, root: root))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: mod.folder.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: backup.appendingPathComponent("PreviousMod/Settings.json").path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: installBackup.path))
+        let config = try ModIO.json(ModIO.configURL(.owlcat, root: root))
+        XCTAssertEqual(config["EnabledModifications"] as? [String], ["Other"])
+        XCTAssertEqual(config["customField"] as? Int, 42)
+        XCTAssertTrue(try ModIO.installed(root: root).isEmpty)
+    }
+    func testUninstallDeletesOnlyAssociatedBackupsAndUMMEntry() throws {
+        let root = try game()
+        let p = try ModIO.prepare(zip(["Info.json": "{\"Id\":\"Test\",\"AssemblyName\":\"Test.dll\"}", "Test.dll": "fixture", "Settings.xml": "settings"]))
+        let installBackup = try ModIO.install(p, root: root)
+        let mod = try XCTUnwrap(ModIO.installed(root: root).first)
+        let toggleBackup = try ModIO.setEnabled(mod, root: root, enabled: false)
+        let other = try ModIO.prepare(zip(["OwlcatModificationManifest.json": owl("OtherMod")]))
+        let otherBackup = try ModIO.install(other, root: root)
+        XCTAssertNil(try ModIO.uninstall(mod, root: root, removeBackups: true))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: mod.folder.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: installBackup.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: toggleBackup.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: otherBackup.path))
+        let doc = try ModIO.xml(Data(contentsOf: ModIO.configURL(.umm, root: root)))
+        let ids = doc.rootElement()!.elements(forName: "ModParams").first!.elements(forName: "Mod").compactMap { $0.attribute(forName: "Id")?.stringValue }
+        XCTAssertEqual(ids, ["OtherUMM"])
+        XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent("UnityModManager/UnityModManager.dll").path))
+    }
+    func testUninstallRejectsStaleTargetAndUnsafeBackup() throws {
+        let root = try game()
+        let p = try ModIO.prepare(zip(["OwlcatModificationManifest.json": owl()]))
+        let backup = try ModIO.install(p, root: root)
+        let mod = try XCTUnwrap(ModIO.installed(root: root).first)
+        let record = backup.appendingPathComponent("Restore.json")
+        try FileManager.default.removeItem(at: record)
+        try FileManager.default.createSymbolicLink(at: record, withDestinationURL: temp.appendingPathComponent("outside"))
+        XCTAssertThrowsError(try ModIO.uninstall(mod, root: root, removeBackups: true))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: mod.folder.path))
+        try FileManager.default.removeItem(at: mod.folder)
+        XCTAssertThrowsError(try ModIO.uninstall(mod, root: root))
+    }
     func testOwlcatInstallAndDisablePreservesConfig() throws {
         let root = try game()
         let p = try ModIO.prepare(zip(["Wrapper/OwlcatModificationManifest.json": owl(), "Wrapper/Blueprints/a.jbp": "{} "]))

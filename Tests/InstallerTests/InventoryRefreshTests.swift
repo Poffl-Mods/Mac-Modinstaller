@@ -1,7 +1,7 @@
 import XCTest
 import Foundation
 import ZIPFoundation
-import ModCore
+@testable import ModCore
 @testable import RogueModInstaller
 
 final class InventoryRefreshTests: XCTestCase {
@@ -63,13 +63,15 @@ final class InventoryRefreshTests: XCTestCase {
     @MainActor func testBusyPreviewConfirmationAndErrorPauseRefresh() async throws {
         _ = try ModIO.install(package("0.4.9"), root: root)
         let model = InstallerModel(defaults: defaults, refreshInterval: 0.03)
-        for blocker in 0..<4 {
+        for blocker in 0..<6 {
             let old = model.mods[0].version
             switch blocker {
             case 0: model.busy = true
             case 1: model.preview = try package("9")
             case 2: model.pendingToggle = model.mods[0]
-            default: model.error = "Existing error"
+            case 3: model.error = "Existing error"
+            case 4: model.harmonyInspection = HarmonyInspection(game: root, fingerprint: "fixture", fileVersion: nil)
+            default: model.pendingUninstall = model.mods[0]
             }
             _ = try ModIO.install(package("0.4.\(12 + blocker)"), root: root)
             model.refresh() // Manual refresh must respect the same protection.
@@ -80,7 +82,9 @@ final class InventoryRefreshTests: XCTestCase {
             case 0: model.busy = false
             case 1: XCTAssertNotNil(model.preview); model.cancelPreview()
             case 2: XCTAssertNotNil(model.pendingToggle); model.pendingToggle = nil
-            default: XCTAssertEqual(model.error, "Existing error"); model.error = nil
+            case 3: XCTAssertEqual(model.error, "Existing error"); model.error = nil
+            case 4: XCTAssertNotNil(model.harmonyInspection); model.harmonyInspection = nil
+            default: XCTAssertNotNil(model.pendingUninstall); model.pendingUninstall = nil
             }
             try await eventually { model.mods[0].version == "0.4.\(12 + blocker)" }
         }
